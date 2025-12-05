@@ -47,63 +47,180 @@ def format_email_html(chapter_content, date_str):
     date_obj = datetime.strptime(f"{current_year}-{date_str}", '%Y-%m-%d')
     readable_date = date_obj.strftime('%B %d')
 
-    # Split content into paragraphs and wrap in <p> tags
+    # Process paragraphs and detect author attributions
     paragraphs = chapter_content.split('\n\n')
-    html_paragraphs = ''.join(f'<p>{p}</p>' for p in paragraphs if p.strip())
+    html_paragraphs = []
 
-    html_content = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <style>
-            body {{
-                font-family: Georgia, serif;
-                line-height: 1.6;
-                color: #333;
-                max-width: 600px;
-                margin: 0 auto;
-                padding: 20px;
-                background-color: #f9f9f9;
-            }}
+    for para in paragraphs:
+        if not para.strip():
+            continue
+
+        # Check if this is an author attribution (starts with — or --)
+        if para.strip().startswith('—') or para.strip().startswith('--'):
+            # Author attribution - style differently
+            author = para.strip().lstrip('—').lstrip('-').strip()
+            html_paragraphs.append(f'<p class="author">— {author}</p>')
+        else:
+            # Regular paragraph
+            html_paragraphs.append(f'<p class="quote">{para.strip()}</p>')
+
+    html_paragraphs_str = ''.join(html_paragraphs)
+
+    html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Email-safe CSS */
+        body {{
+            margin: 0;
+            padding: 0;
+            font-family: Georgia, 'Times New Roman', serif;
+            background-color: #f5f5f0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }}
+
+        .email-wrapper {{
+            width: 100%;
+            background-color: #f5f5f0;
+            padding: 20px 0;
+        }}
+
+        .container {{
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }}
+
+        .header {{
+            background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%);
+            padding: 32px 40px;
+            text-align: center;
+        }}
+
+        .header h1 {{
+            margin: 0;
+            padding: 0;
+            color: #ffffff;
+            font-size: 26px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            line-height: 1.3;
+        }}
+
+        .subheader {{
+            margin: 8px 0 0 0;
+            padding: 0;
+            color: #f5f5f0;
+            font-size: 13px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }}
+
+        .content {{
+            padding: 40px 40px 32px 40px;
+            color: #2c2c2c;
+            line-height: 1.8;
+        }}
+
+        .quote {{
+            margin: 0 0 20px 0;
+            padding: 0;
+            font-size: 16px;
+            color: #2c2c2c;
+            text-align: left;
+        }}
+
+        .author {{
+            margin: -8px 0 28px 0;
+            padding: 0;
+            font-size: 14px;
+            color: #8b7355;
+            font-style: italic;
+            text-align: left;
+            font-weight: 500;
+        }}
+
+        .divider {{
+            margin: 32px auto;
+            width: 60px;
+            height: 1px;
+            background-color: #d4c5b9;
+        }}
+
+        .footer {{
+            padding: 24px 40px 32px 40px;
+            background-color: #fafaf8;
+            border-top: 1px solid #e8e8e0;
+            text-align: center;
+        }}
+
+        .footer-text {{
+            margin: 0;
+            padding: 0;
+            font-size: 13px;
+            color: #8b8b8b;
+            font-style: italic;
+        }}
+
+        .footer-book {{
+            margin: 8px 0 0 0;
+            padding: 0;
+            font-size: 11px;
+            color: #a8a8a8;
+            letter-spacing: 0.5px;
+        }}
+
+        /* Mobile responsiveness */
+        @media only screen and (max-width: 600px) {{
             .container {{
-                background-color: white;
-                padding: 30px;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                border-radius: 0;
             }}
-            h1 {{
-                color: #2c3e50;
-                font-size: 24px;
-                margin-bottom: 20px;
-                border-bottom: 2px solid #3498db;
-                padding-bottom: 10px;
+            .header {{
+                padding: 28px 24px;
             }}
-            p {{
-                margin-bottom: 15px;
-                text-align: justify;
+            .header h1 {{
+                font-size: 22px;
+            }}
+            .content {{
+                padding: 32px 24px 24px 24px;
+            }}
+            .quote {{
+                font-size: 15px;
             }}
             .footer {{
-                margin-top: 30px;
-                padding-top: 20px;
-                border-top: 1px solid #eee;
-                font-size: 12px;
-                color: #777;
-                text-align: center;
+                padding: 20px 24px 28px 24px;
             }}
-        </style>
-    </head>
-    <body>
+        }}
+    </style>
+</head>
+<body>
+    <div class="email-wrapper">
         <div class="container">
-            <h1>Your Daily Reading - {readable_date}</h1>
-            {html_paragraphs}
+            <div class="header">
+                <h1>Your Daily Reading</h1>
+                <p class="subheader">{readable_date}</p>
+            </div>
+
+            <div class="content">
+                {html_paragraphs_str}
+            </div>
+
             <div class="footer">
-                <p>Daily Book Emailer</p>
+                <p class="footer-text">A moment of wisdom to start your day</p>
+                <p class="footer-book">From "A Calendar of Wisdom" by Leo Tolstoy</p>
             </div>
         </div>
-    </body>
-    </html>
-    """
+    </div>
+</body>
+</html>"""
 
     return html_content
 
