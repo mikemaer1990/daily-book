@@ -1,0 +1,45 @@
+name: Send Daily Chapter Email
+
+on:
+  schedule:
+    # Runs at 6:00 AM PST/PDT (14:00 UTC in winter, 13:00 UTC in summer)
+    # Using 14:00 UTC to cover PST (UTC-8)
+    - cron: '0 14 * * *'
+  workflow_dispatch:  # Allow manual trigger for testing
+
+jobs:
+  send-email:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Send daily chapter
+        env:
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+          SENDER_NAME: ${{ secrets.SENDER_NAME }}
+          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+        run: python send_daily_chapter.py
+
+      - name: Report status
+        if: always()
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "✓ Daily chapter sent successfully"
+          else
+            echo "✗ Failed to send daily chapter"
+            exit 1
+          fi

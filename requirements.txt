@@ -1,0 +1,4 @@
+ebooklib==0.18
+beautifulsoup4==4.12.2
+sib-api-v3-sdk==7.6.0
+python-dotenv==1.0.0
