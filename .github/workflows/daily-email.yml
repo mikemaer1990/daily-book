@@ -2,9 +2,8 @@ name: Send Daily Chapter Email
 
 on:
   schedule:
-    # Runs at 6:00 AM PST/PDT (14:00 UTC in winter, 13:00 UTC in summer)
-    # Using 14:00 UTC to cover PST (UTC-8)
-    - cron: '0 14 * * *'
+    # Runs at 12:00 AM PST (08:00 UTC, UTC-8)
+    - cron: '0 8 * * *'
   workflow_dispatch:  # Allow manual trigger for testing
 
 jobs:
