@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def load_chapters(chapters_file='chapters.json'):
+def load_chapters(chapters_file='chapters_condensed.json'):
     """Load chapters from JSON file."""
     if not Path(chapters_file).exists():
         print(f"Error: {chapters_file} not found!")
